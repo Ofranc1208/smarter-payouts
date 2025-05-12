@@ -19,7 +19,7 @@ import Terms from './pages/Terms';
 // Blog imports
 import StructuredSettlements from './pages/Blog/StructuredSettlements';
 import ShouldYouSell from './pages/Blog/ShouldYouSell';
-import HowFastPayout from './pages/Blog/HowFastPayout'; // ✅ Corrected import
+import HowFastPayout from './pages/Blog/HowFastPayout';
 
 const App = () => {
   return (
@@ -49,3 +49,5 @@ const App = () => {
 };
 
 export default App;
+
+// ✅ Trigger Vercel redeploy
