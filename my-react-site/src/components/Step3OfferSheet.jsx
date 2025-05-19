@@ -34,7 +34,8 @@ const Step3OfferSheet = ({ calculationResult, formData, onBack }) => {
     );
   }
 
-  const { npv, payments, familyProtectionNPV } = result;
+  const { familyProtectionNPV } = result;
+
 
   const format = (val) =>
     val?.toLocaleString('en-US', {

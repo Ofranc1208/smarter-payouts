@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 const Index = () => {
   useEffect(() => {
@@ -11,6 +12,15 @@ const Index = () => {
 
   return (
     <>
+      <Helmet>
+        <title>SmarterPayouts - Get the Highest Early Payout for Your Future Payments</title>
+        <meta name="description" content="Get the highest early payout for your future payments instantly. No pushy sales calls. No sensitive personal information required. Industry's first online self-quoting platform." />
+        <meta name="keywords" content="structured settlement, early payout, cash now, settlement calculator" />
+        <meta property="og:title" content="SmarterPayouts - Get Your Early Payout Today" />
+        <meta property="og:description" content="Get the highest early payout for your future payments instantly. No pushy sales calls required." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+      </Helmet>
       {/* ✅ HERO SECTION */}
       <section className="hero">
         <video

@@ -1,57 +1,120 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import ErrorBoundary from './components/ErrorBoundary';
+import './styles/calculator.css';
 
-// Page imports
+// Direct imports for frequently accessed pages
 import Index from './pages/Index';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Articles from './pages/Articles';
-import CourtApproval from './pages/CourtApproval';
 import FAQs from './pages/FAQs';
-import GetAQuote from './pages/GetAQuote';
-import GetYourCash from './pages/GetYourCash';
-import Main from './pages/Main';
-import PricingCalculator from './pages/PricingCalculator';
 import Privacy from './pages/Privacy';
-import ReviewOffer from './pages/ReviewOffer';
 import Terms from './pages/Terms';
-import './styles/calculator.css';
+import NotFound from './pages/NotFound';
 
-// Blog imports
-import StructuredSettlements from './pages/Blog/StructuredSettlements';
-import ShouldYouSell from './pages/Blog/ShouldYouSell';
-import HowFastPayout from './pages/Blog/HowFastPayout';
+// Lazy load complex pages
+const PricingCalculator = lazy(() => import('./pages/PricingCalculator'));
+const Articles = lazy(() => import('./pages/Articles'));
+const CourtApproval = lazy(() => import('./pages/CourtApproval'));
+const GetAQuote = lazy(() => import('./pages/GetAQuote'));
+const GetYourCash = lazy(() => import('./pages/GetYourCash'));
+const Main = lazy(() => import('./pages/Main'));
+const ReviewOffer = lazy(() => import('./pages/ReviewOffer'));
+const Step3OfferSheet = lazy(() => import('./components/Step3OfferSheet'));
 
-// ✅ Merged offer display component
-import Step3OfferSheet from './components/Step3OfferSheet';
+// Lazy load blog pages
+const StructuredSettlements = lazy(() => import('./pages/Blog/StructuredSettlements'));
+const ShouldYouSell = lazy(() => import('./pages/Blog/ShouldYouSell'));
+const HowFastPayout = lazy(() => import('./pages/Blog/HowFastPayout'));
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+    <div className="spinner-border text-primary" role="status">
+      <span className="visually-hidden">Loading...</span>
+    </div>
+  </div>
+);
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/articles" element={<Articles />} />
-        <Route path="/courtapproval" element={<CourtApproval />} />
-        <Route path="/faqs" element={<FAQs />} />
-        <Route path="/getaquote" element={<GetAQuote />} />
-        <Route path="/getyourcash" element={<GetYourCash />} />
-        <Route path="/main" element={<Main />} />
-        <Route path="/pricingcalculator" element={<PricingCalculator />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/reviewoffer" element={<ReviewOffer />} />
-        <Route path="/terms" element={<Terms />} />
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Directly loaded routes */}
+          <Route path="/" element={<Index />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faqs" element={<FAQs />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
 
-        {/* ✅ Blog Routes */}
-        <Route path="/blog/structured-settlements-explained" element={<StructuredSettlements />} />
-        <Route path="/blog/should-you-sell-structured-settlement" element={<ShouldYouSell />} />
-        <Route path="/blog/how-fast-is-settlement-payout" element={<HowFastPayout />} />
+          {/* Lazy loaded routes */}
+          <Route path="/articles" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <Articles />
+            </Suspense>
+          } />
+          <Route path="/courtapproval" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <CourtApproval />
+            </Suspense>
+          } />
+          <Route path="/getaquote" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <GetAQuote />
+            </Suspense>
+          } />
+          <Route path="/getyourcash" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <GetYourCash />
+            </Suspense>
+          } />
+          <Route path="/main" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <Main />
+            </Suspense>
+          } />
+          <Route path="/pricingcalculator" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <PricingCalculator />
+            </Suspense>
+          } />
+          <Route path="/reviewoffer" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ReviewOffer />
+            </Suspense>
+          } />
 
-        {/* ✅ Unified Offer Sheet (for both Guaranteed + Life Contingent) */}
-        <Route path="/step3" element={<Step3OfferSheet />} />
-      </Routes>
-    </Router>
+          {/* Blog Routes */}
+          <Route path="/blog/structured-settlements-explained" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <StructuredSettlements />
+            </Suspense>
+          } />
+          <Route path="/blog/should-you-sell-structured-settlement" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ShouldYouSell />
+            </Suspense>
+          } />
+          <Route path="/blog/how-fast-is-settlement-payout" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <HowFastPayout />
+            </Suspense>
+          } />
+
+          {/* Unified Offer Sheet */}
+          <Route path="/step3" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <Step3OfferSheet />
+            </Suspense>
+          } />
+
+          {/* 404 Route - Must be last */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 };
 

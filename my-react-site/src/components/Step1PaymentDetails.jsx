@@ -24,7 +24,20 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
 
   const handleAmountChange = (e) => {
     let value = e.target.value;
-    if (value.length > 7) value = value.slice(0, 7);
+    // Remove any characters that are not digits (0-9) or a single decimal point
+    value = value.replace(/[^0-9.]/g, '');
+    // Ensure only one decimal point is allowed
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('');
+    }
+
+    // Limit the number of digits to 7 (excluding decimal point)
+    const integerPart = value.split('.')[0];
+    if (integerPart.length > 7) {
+      value = integerPart.slice(0, 7) + (parts.length > 1 ? '.' + parts[1] : '');
+    }
+
     updateField('amount', value);
   };
 
@@ -32,8 +45,12 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
     const newErrors = {};
     const amt = parseFloat(amount);
 
-    if (isNaN(amt) || amt < 100 || amt > 1000000) {
-      newErrors.amount = 'Enter a value between $100 and $1,000,000';
+    if (isNaN(amt)) {
+      newErrors.amount = 'Please enter a valid number for the amount.';
+    } else if (amt < 0) {
+      newErrors.amount = 'Amount cannot be negative.';
+    } else if (amt < 100 || amt > 1000000) {
+      newErrors.amount = 'Enter a value between $100 and $1,000,000.';
     }
     if (!validateStartDate(startDate)) {
       newErrors.startDate = 'Start date cannot be in the past (min May 14, 2024)';
@@ -100,7 +117,7 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
           </span>
         </label>
         <div className="calculator-button-group">
-          {['Guaranteed', 'Life Contingent', "I Don’t Know"].map(type => (
+          {['Guaranteed', 'Life Contingent', "I Don't Know"].map(type => (
             <button
               key={type}
               type="button"
@@ -158,10 +175,16 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
           </span>
         </label>
         <input
-          type="number"
+          type="text"
           placeholder="Enter amount between 100 – 1,000,000"
           value={amount}
           onChange={handleAmountChange}
+          onKeyDown={(e) => {
+            // Prevent the user from typing the negative sign
+            if (e.key === '-') {
+              e.preventDefault();
+            }
+          }}
           className={`form-control ${errors.amount ? 'is-invalid' : ''}`}
         />
         {errors.amount && <div className="invalid-feedback">{errors.amount}</div>}
@@ -198,7 +221,7 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
 
       {/* Dates */}
       <div className="row mb-3">
-        <div className="col-md-6">
+        <div className="col-md-6 mb-3">
           <label className="calculator-label">
             Payment Start Date
             <span
@@ -215,6 +238,7 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
           <input
             type="date"
             value={startDate}
+            min="2024-05-14"
             onChange={e => updateField('startDate', e.target.value)}
             className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
           />

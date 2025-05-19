@@ -37,6 +37,11 @@ const PricingCalculator = () => {
           Use this simple tool to estimate the current value of your future structured settlement payment.
         </p>
 
+        {/* Step Indicator */}
+        <div className="text-center mb-4">
+          Step {step} of {3} {/* Assuming 3 steps total */}
+        </div>
+
         {step === 1 && (
           <Step1PaymentDetails
             onNext={() =>
