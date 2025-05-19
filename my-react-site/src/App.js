@@ -15,11 +15,15 @@ import PricingCalculator from './pages/PricingCalculator';
 import Privacy from './pages/Privacy';
 import ReviewOffer from './pages/ReviewOffer';
 import Terms from './pages/Terms';
+import './styles/calculator.css';
 
 // Blog imports
 import StructuredSettlements from './pages/Blog/StructuredSettlements';
 import ShouldYouSell from './pages/Blog/ShouldYouSell';
 import HowFastPayout from './pages/Blog/HowFastPayout';
+
+// ✅ Merged offer display component
+import Step3OfferSheet from './components/Step3OfferSheet';
 
 const App = () => {
   return (
@@ -43,11 +47,12 @@ const App = () => {
         <Route path="/blog/structured-settlements-explained" element={<StructuredSettlements />} />
         <Route path="/blog/should-you-sell-structured-settlement" element={<ShouldYouSell />} />
         <Route path="/blog/how-fast-is-settlement-payout" element={<HowFastPayout />} />
+
+        {/* ✅ Unified Offer Sheet (for both Guaranteed + Life Contingent) */}
+        <Route path="/step3" element={<Step3OfferSheet />} />
       </Routes>
     </Router>
   );
 };
 
 export default App;
-
-// ✅ Trigger Vercel redeploy

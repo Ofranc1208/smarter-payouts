@@ -4,7 +4,9 @@ import { Link } from 'react-router-dom';
 const Index = () => {
   useEffect(() => {
     const pulse = document.getElementById('pulseText');
-    if (pulse) pulse.classList.add('pulse-effect');
+    if (pulse) {
+      pulse.classList.add('pulse-effect');
+    }
   }, []);
 
   return (
@@ -20,6 +22,7 @@ const Index = () => {
           id="bg-video"
         >
           <source src="/images/counting-cash.mp4" type="video/mp4" />
+          {/* Fallback image for unsupported video */}
           <img src="/assets/fallback.jpg" alt="Structured Settlement Video Preview" />
         </video>
 
