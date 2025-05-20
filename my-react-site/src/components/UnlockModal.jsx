@@ -7,11 +7,29 @@ import { auth, db, RecaptchaVerifier } from '../firebase';
 import { signInWithPhoneNumber } from 'firebase/auth';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
+// Helper function to format phone number with dashes
+const formatPhoneNumber = (digits) => {
+  if (!digits) return '';
+  // Remove all non-digit characters (should already be done by input change handler, but as a safeguard)
+  const cleaned = digits.replace(/\D/g, '');
+  // Apply formatting
+  if (cleaned.length > 6) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+  } else if (cleaned.length > 3) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}`;
+  } else {
+    return cleaned;
+  }
+};
+
 const UnlockModal = () => {
   const [phoneDigits, setPhoneDigits] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState(null);
   const [step, setStep] = useState('phone');
+  const [loading, setLoading] = useState(false);
+  const [recaptchaError, setRecaptchaError] = useState(null);
+  const [firebaseError, setFirebaseError] = useState(null);
 
   useEffect(() => {
     const setupRecaptcha = async () => {
@@ -19,30 +37,48 @@ const UnlockModal = () => {
 
       try {
         // Optional: enable this only for localhost dev
-        if (window.location.hostname === 'localhost') {
+        // Check if auth.settings exists and we are on localhost
+        if (window.location.hostname === 'localhost' && auth.settings) {
           auth.settings.appVerificationDisabledForTesting = true;
           console.log('🧪 Dev mode reCAPTCHA bypass enabled');
+          // On localhost with bypass, we don't need to render the reCAPTCHA widget
+          return; // Exit the function after enabling bypass
+        } else if (window.location.hostname !== 'localhost'){
+           // If not localhost, render the reCAPTCHA widget
+            window.recaptchaVerifier = new RecaptchaVerifier(
+              'recaptcha-container',
+              {
+                size: 'invisible',
+                callback: (response) => {
+                  console.log('✅ reCAPTCHA solved:', response);
+                }
+              },
+              auth
+            );
+            await window.recaptchaVerifier.render();
+            console.log('✅ reCAPTCHA initialized for non-localhost');
         }
 
-        window.recaptchaVerifier = new RecaptchaVerifier(
-          'recaptcha-container',
-          {
-            size: 'invisible',
-            callback: (response) => {
-              console.log('✅ reCAPTCHA solved:', response);
-            }
-          },
-          auth
-        );
+       // The reCAPTCHA widget for localhost bypass is not needed, as Firebase handles it internally when appVerificationDisabledForTesting is true.
+       // The recaptcha-container div is still needed for the RecaptchaVerifier constructor even in invisible mode.
 
-        await window.recaptchaVerifier.render();
-        console.log('✅ reCAPTCHA initialized');
+        console.log('✅ reCAPTCHA setup attempt finished');
+
       } catch (error) {
         console.error('❌ reCAPTCHA init error:', error);
+        setRecaptchaError('Could not load verification. Please try again later.');
       }
     };
 
     setupRecaptcha();
+
+    // Cleanup function
+    return () => {
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    };
   }, []);
 
   const handleInputChange = (e) => {
@@ -51,27 +87,51 @@ const UnlockModal = () => {
   };
 
   const handleSendCode = async () => {
+    setLoading(true);
+    setFirebaseError(null);
     if (phoneDigits.length !== 10) {
-      return alert('📱 Please enter a valid 10-digit phone number');
+      setFirebaseError('📱 Please enter a valid 10-digit phone number');
+      setLoading(false);
+      return;
     }
 
     const fullPhone = `+1${phoneDigits}`;
 
+    // Log details just before sending
+    console.log('Attempting to send code to phone:', fullPhone);
+
+    // Pass undefined for appVerifier on localhost if bypass is enabled, Firebase handles it.
+    // Otherwise, pass the initialized window.recaptchaVerifier.
+    const appVerifier = window.location.hostname === 'localhost' && auth.settings?.appVerificationDisabledForTesting
+      ? undefined
+      : window.recaptchaVerifier;
+
+    console.log('Auth object:', auth);
+    console.log('App Verifier being passed:', appVerifier);
+
     try {
-      const appVerifier = window.recaptchaVerifier;
       const result = await signInWithPhoneNumber(auth, fullPhone, appVerifier);
       setConfirmationResult(result);
       setStep('otp');
-      alert(`✅ Code sent to ${fullPhone}`);
     } catch (err) {
       console.error('❌ Firebase error sending code:', err);
-      alert('❌ Failed to send verification code. ' + (err.message || 'Check console.'));
+      let errorMessage = 'Failed to send verification code.';
+      if (err.code === 'auth/invalid-phone-number') errorMessage = 'Invalid phone number format.';
+      if (err.code === 'auth/too-many-requests') errorMessage = 'Too many requests. Try again later.';
+      if (err.code === 'auth/argument-error') errorMessage = 'Verification failed. Please try again.'; // Added a specific message for argument error
+      setFirebaseError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVerifyCode = async () => {
+    setLoading(true);
+    setFirebaseError(null);
     if (otp.length !== 6) {
-      return alert('⚠️ Enter the 6-digit code sent to your phone');
+      setFirebaseError('⚠️ Enter the 6-digit code sent to your phone');
+      setLoading(false);
+      return;
     }
 
     try {
@@ -86,7 +146,12 @@ const UnlockModal = () => {
       alert('✅ Phone verified!');
     } catch (error) {
       console.error('❌ Invalid code:', error);
-      alert('Invalid verification code. Try again.');
+      let errorMessage = 'Invalid verification code. Try again.';
+      if (error.code === 'auth/invalid-verification-code') errorMessage = 'The verification code is invalid.';
+      if (error.code === 'auth/code-expired') errorMessage = 'The verification code has expired.';
+      setFirebaseError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,29 +178,24 @@ const UnlockModal = () => {
               Your quote is reserved for 24 hours. Secure it below:
             </p>
 
-            <div style={{ position: 'relative', width: '100%' }}>
-              <input
-                type="tel"
-                placeholder="e.g. 5615831280"
-                value={phoneDigits}
-                onChange={handleInputChange}
-                style={{ paddingLeft: '3.2rem' }}
-              />
-              <span
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '1rem',
-                  transform: 'translateY(-50%)',
-                  color: '#999',
-                  fontSize: '14px'
-                }}
-              >
-                +1
-              </span>
-            </div>
+            {/* Phone Number Input */}
+            <input
+              type="tel"
+              placeholder="e.g. 561-583-1280"
+              value={formatPhoneNumber(phoneDigits)}
+              onChange={handleInputChange}
+              className="phone-input-field"
+              disabled={loading}
+            />
+            {firebaseError && <div className="text-danger small mt-2">{firebaseError}</div>}
 
-            <button onClick={handleSendCode}>Send Code</button>
+            <button 
+              onClick={handleSendCode}
+              disabled={loading}
+              className={loading ? 'loading' : ''}
+            >
+              {loading ? 'Sending...' : 'Send Code'}
+            </button>
           </>
         )}
 
@@ -150,9 +210,17 @@ const UnlockModal = () => {
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter 6-digit code"
+              disabled={loading}
             />
+            {firebaseError && <div className="text-danger small mt-2">{firebaseError}</div>}
 
-            <button onClick={handleVerifyCode}>Verify</button>
+            <button 
+              onClick={handleVerifyCode}
+              disabled={loading}
+              className={loading ? 'loading' : ''}
+            >
+              {loading ? 'Verifying...' : 'Verify'}
+            </button>
           </>
         )}
 
