@@ -22,7 +22,7 @@ const PricingCalculator = () => {
 
   const goToStep = (newStep) => {
     if (newStep === 1) {
-      setCalculationResult(null); // Reset old results
+      setCalculationResult(null);
     }
     setStep(newStep);
   };
@@ -31,15 +31,14 @@ const PricingCalculator = () => {
     <>
       <Navbar />
 
-      <div className="container py-5">
+      <div className="container py-3">
         <h1 className="mb-4 text-success fw-bold text-center">Early Payout Calculator</h1>
         <p className="text-center text-muted mb-5">
           Use this simple tool to estimate the current value of your future structured settlement payment.
         </p>
 
-        {/* Step Indicator */}
-        <div className="text-center mb-4">
-          Step {step} of {3} {/* Assuming 3 steps total */}
+        <div className="text-center mb-2">
+          Step {step} of {3}
         </div>
 
         {step === 1 && (

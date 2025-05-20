@@ -7,6 +7,7 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
   const [errors, setErrors] = useState({});
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isAdditionalDetailsCollapsed, setIsAdditionalDetailsCollapsed] = useState(true);
 
   const {
     amount,
@@ -99,8 +100,6 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
 
   return (
     <div className="step step1 calculator">
-      <h2 className="text-center mb-4">Early Payout Calculator</h2>
-
       {/* Payment Type */}
       <div className="calculator-section">
         <label className="calculator-label">
@@ -190,82 +189,99 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
         {errors.amount && <div className="invalid-feedback">{errors.amount}</div>}
       </div>
 
-      {/* Annual Increase */}
-      <div className="calculator-section">
-        <label className="calculator-label">
-          Annual Increase (%)
-          <span
-            className="what-is-it-trigger"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              showInfo(tooltipDefinitions.increaseRate);
-            }}
-          >
-            ( More Info )
-          </span>
-        </label>
-        <div className="calculator-button-group three-col small-button-group">
-          {[0, 1, 2, 3, 4, 5, 6].map(rate => (
-            <button
-              key={rate}
-              type="button"
-              className={`calculator-increase-button ${increaseRate === rate ? 'selected-increase' : ''}`}
-              onClick={() => updateField('increaseRate', rate)}
-            >
-              {rate}%
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Additional Details - Collapsible Section */}
+      <div className="calculator-section-collapsible">
+        <h3
+          className="collapsible-header"
+          onClick={() => setIsAdditionalDetailsCollapsed(!isAdditionalDetailsCollapsed)}
+        >
+          Additional Details
+          <span className={`collapse-icon ${isAdditionalDetailsCollapsed ? 'collapsed' : ''}`}>▼</span>
+        </h3>
 
-      {/* Dates */}
-      <div className="row mb-3">
-        <div className="col-md-6 mb-3">
-          <label className="calculator-label">
-            Payment Start Date
-            <span
-              className="what-is-it-trigger"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showInfo(tooltipDefinitions.startDate);
-              }}
-            >
-              ( More Info )
-            </span>
-          </label>
-          <input
-            type="date"
-            value={startDate}
-            min="2024-05-14"
-            onChange={e => updateField('startDate', e.target.value)}
-            className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
-          />
-          {errors.startDate && <div className="invalid-feedback">{errors.startDate}</div>}
-        </div>
-        <div className="col-md-6">
-          <label className="calculator-label">
-            Payment End Date
-            <span
-              className="what-is-it-trigger"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                showInfo(tooltipDefinitions.endDate);
-              }}
-            >
-              ( More Info )
-            </span>
-          </label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={e => updateField('endDate', e.target.value)}
-            className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
-          />
-          {errors.endDate && <div className="invalid-feedback">{errors.endDate}</div>}
-        </div>
+        {!isAdditionalDetailsCollapsed && (
+          <div className="collapsible-content">
+
+            {/* Annual Increase */}
+            <div className="calculator-section">
+              <label className="calculator-label">
+                Annual Increase (%)
+                <span
+                  className="what-is-it-trigger"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showInfo(tooltipDefinitions.increaseRate);
+                  }}
+                >
+                  ( More Info )
+                </span>
+              </label>
+              <div className="calculator-button-group three-col small-button-group">
+                {[0, 1, 2, 3, 4, 5, 6].map(rate => (
+                  <button
+                    key={rate}
+                    type="button"
+                    className={`calculator-increase-button ${increaseRate === rate ? 'selected-increase' : ''}`}
+                    onClick={() => updateField('increaseRate', rate)}
+                  >
+                    {rate}%
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dates */}
+            <div className="row mb-3">
+              <div className="col-md-6 mb-3">
+                <label className="calculator-label">
+                  Payment Start Date
+                  <span
+                    className="what-is-it-trigger"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      showInfo(tooltipDefinitions.startDate);
+                    }}
+                  >
+                    ( More Info )
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  min="2024-05-14"
+                  onChange={e => updateField('startDate', e.target.value)}
+                  className={`form-control ${errors.startDate ? 'is-invalid' : ''}`}
+                />
+                {errors.startDate && <div className="invalid-feedback">{errors.startDate}</div>}
+              </div>
+              <div className="col-md-6">
+                <label className="calculator-label">
+                  Payment End Date
+                  <span
+                    className="what-is-it-trigger"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      showInfo(tooltipDefinitions.endDate);
+                    }}
+                  >
+                    ( More Info )
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={e => updateField('endDate', e.target.value)}
+                  className={`form-control ${errors.endDate ? 'is-invalid' : ''}`}
+                />
+                {errors.endDate && <div className="invalid-feedback">{errors.endDate}</div>}
+              </div>
+            </div>
+
+          </div>
+        )}
       </div>
 
       {/* Submit */}
