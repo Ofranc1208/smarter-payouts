@@ -5,6 +5,8 @@
 // 🔢 Base discount rates (can be modified)
 export const BASE_DISCOUNT_RATE = 0.085;         // For Guaranteed payments
 export const BASE_DISCOUNT_RATE_LCP = 0.085;     // For Life-Contingent payments
+export const BASE_DISCOUNT_RATE_LUMP_SUM_GUARANTEED = 0.085; // For Guaranteed Lump Sum payments
+export const BASE_DISCOUNT_RATE_LUMP_SUM_LCP = 0.085;      // For Life-Contingent Lump Sum payments
 
 // 📉 Min/Max payout rate spreads
 export const RATE_SPREADS = {

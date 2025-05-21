@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { calculateGuaranteedNPV } from '../utils/npvCalculations';
 import { validateStartDate, validateEndDateRange } from '../utils/validationHelpers';
 import tooltipDefinitions from '../utils/tooltipDefinitions';
+import { useNavigate } from 'react-router-dom';
 
 const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResult }) => {
   const [errors, setErrors] = useState({});
   const [tooltipContent, setTooltipContent] = useState('');
   const [showTooltip, setShowTooltip] = useState(false);
   const [isAdditionalDetailsCollapsed, setIsAdditionalDetailsCollapsed] = useState(true);
+  const navigate = useNavigate();
 
   const {
     amount,
@@ -150,7 +152,13 @@ const Step1PaymentDetails = ({ formData, setFormData, onNext, setCalculationResu
               key={mode}
               type="button"
               className={`calculator-mode-button ${paymentMode === mode ? 'selected-mode' : ''}`}
-              onClick={() => updateField('paymentMode', mode)}
+              onClick={() => {
+                updateField('paymentMode', mode);
+                if (mode === 'Lump Sum') {
+                  // Navigate directly to the Lump Sum Calculator page
+                  navigate('/lump-sum-calculator', { state: { formData: { ...formData, paymentMode: mode } } });
+                }
+              }}
             >
               {mode}
             </button>

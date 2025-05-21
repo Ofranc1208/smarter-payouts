@@ -21,11 +21,15 @@ const GetYourCash = lazy(() => import('./pages/GetYourCash'));
 const Main = lazy(() => import('./pages/Main'));
 const ReviewOffer = lazy(() => import('./pages/ReviewOffer'));
 const Step3OfferSheet = lazy(() => import('./components/Step3OfferSheet'));
+const LumpSumCalculatorPage = lazy(() => import('./pages/LumpSumCalculatorPage'));
 
 // Lazy load blog pages
 const StructuredSettlements = lazy(() => import('./pages/Blog/StructuredSettlements'));
 const ShouldYouSell = lazy(() => import('./pages/Blog/ShouldYouSell'));
 const HowFastPayout = lazy(() => import('./pages/Blog/HowFastPayout'));
+
+// ✅ Lazy load the new Lump Sum Test Link page
+const LumpSumTestLink = lazy(() => import('./pages/LumpSumTestLink'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -83,6 +87,20 @@ const App = () => {
           <Route path="/reviewoffer" element={
             <Suspense fallback={<LoadingSpinner />}>
               <ReviewOffer />
+            </Suspense>
+          } />
+
+          {/* Add route for Lump Sum Calculator */}
+          <Route path="/lump-sum-calculator" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <LumpSumCalculatorPage />
+            </Suspense>
+          } />
+
+          {/* ✅ Add route for Lump Sum Test Link page */}
+          <Route path="/lump-sum-test" element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <LumpSumTestLink />
             </Suspense>
           } />
 

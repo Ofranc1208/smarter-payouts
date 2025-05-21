@@ -31,7 +31,7 @@ const GetAQuote = () => (
             <Link to="/pricingcalculator" className="text-decoration-none text-dark" aria-label="Use our online calculator to get a quote">
               <div className="card-steps p-4 rounded shadow-sm h-100 hover-shadow position-relative" style={{ cursor: 'pointer', transition: 'box-shadow 0.2s' }}>
                 <div className="position-absolute top-0 end-0 m-3" style={{ fontSize: '2rem' }} role="img" aria-label="Calculator">🧮</div>
-                <h5 className="text-success fw-bold mb-3">Option 1: Use Our Online Calculator</h5>
+                <h5 className="text-success fw-bold mb-3">Option 1:Online Calculator</h5>
                 <p className="fw-bold mb-1">Fast, Private, and Secure</p>
                 <p className="text-muted">
                   Enter basic payment details—no personal info or credit check required. See your potential cash offer in seconds.
